@@ -61,6 +61,17 @@ const auth = (c: any) => cfg.cronToken && c.req.header("authorization") === `Bea
 app.post("/cron/reporte", async c => { if (!auth(c)) return c.text("no", 401); return c.json({ texto: await enviarReporteDiario() }); });
 app.post("/cron/recordatorios", async c => { if (!auth(c)) return c.text("no", 401); await recordatoriosDeManana(); return c.json({ ok: true }); });
 app.post("/setup/hoja", async c => { if (!auth(c)) return c.text("no", 401); return c.json({ pestanas_creadas: await asegurarPestanas(), url: urlHoja() }); });
+// Suscribe la cuenta de WhatsApp Business (WABA) a ESTA app de Meta, para que Meta nos mande los webhooks
+app.post("/setup/whatsapp", async c => {
+  if (!auth(c)) return c.text("no", 401);
+  const waba = c.req.query("waba") || process.env.META_WABA_ID || "";
+  if (!waba) return c.json({ error: "falta ?waba=ID o META_WABA_ID" }, 400);
+  const h = { Authorization: `Bearer ${cfg.meta.token}` };
+  const sub = await fetch(`https://graph.facebook.com/${cfg.meta.version}/${waba}/subscribed_apps`, { method: "POST", headers: h }).then(r => r.json());
+  const lista = await fetch(`https://graph.facebook.com/${cfg.meta.version}/${waba}/subscribed_apps`, { headers: h }).then(r => r.json());
+  const quien = await fetch(`https://graph.facebook.com/${cfg.meta.version}/debug_token?input_token=${cfg.meta.token}`, { headers: h }).then(r => r.json()).catch(() => null);
+  return c.json({ suscripcion: sub, apps_suscritas: lista, app_del_token: quien?.data?.application, expira: quien?.data?.expires_at });
+});
 app.post("/setup/telegram", async c => { if (!auth(c)) return c.text("no", 401); const base = c.req.query("base") || new URL(c.req.url).origin; return c.json(await tg.registrarWebhook(base.replace(/^http:/, "https:"))); });
 
 // ── Crons internos (hora del negocio) ─────────────────────────────────────
