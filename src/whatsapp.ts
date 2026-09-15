@@ -5,7 +5,12 @@ import { log, warn } from "./util.ts";
 const base = () => `https://graph.facebook.com/${cfg.meta.version}`;
 const headers = () => ({ Authorization: `Bearer ${cfg.meta.token}`, "Content-Type": "application/json" });
 
+/** México: WhatsApp identifica a los usuarios como 521XXXXXXXXXX (prefijo viejo), pero la API y la lista de
+ *  destinatarios usan 52XXXXXXXXXX. Normalizamos al enviar. */
+export const normalizarMX = (n: string) => n.replace(/^521(\d{10})$/, "52$1");
+
 async function post(payload: Record<string, unknown>): Promise<{ ok: boolean; code?: number; error?: string }> {
+  if (typeof payload.to === "string") payload.to = normalizarMX(payload.to);
   const r = await fetch(`${base()}/${cfg.meta.phoneId}/messages`, {
     method: "POST", headers: headers(), body: JSON.stringify({ messaging_product: "whatsapp", ...payload }),
   });
