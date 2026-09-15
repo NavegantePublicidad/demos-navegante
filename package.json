@@ -1,0 +1,24 @@
+{
+  "name": "demos-navegante",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Demos funcionales de Navegante Publicidad: WhatsApp (Meta Cloud API) + Telegram + Claude + Google Sheets/Calendar",
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "dev": "node --watch --experimental-strip-types --experimental-sqlite src/index.ts",
+    "start": "node --experimental-strip-types --experimental-sqlite src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.125.0",
+    "@hono/node-server": "^2.1.1",
+    "googleapis": "^181.0.0",
+    "hono": "^4.13.7",
+    "node-cron": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
